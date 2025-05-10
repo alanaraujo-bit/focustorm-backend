@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import { createClient } from '@supabase/supabase-js';
+
 dotenv.config();
-const express = require('express');
-const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(cors());
@@ -14,28 +15,25 @@ const supabase = createClient(
 
 app.get('/ranking', async (req, res) => {
   try {
-const { data, error } = await supabase
-  .from('sessoes1')
-  .select(`
-  usuario_id,
-  duracao,
-  tipo,
-  usuarios (
-    name
-  )
-`)
-  .order('duracao', { ascending: false });
-  console.log("🔍 Dados recebidos do Supabase:");
-console.log(JSON.stringify(data, null, 2));
+    const { data, error } = await supabase
+      .from('sessoes1')
+      .select(`
+        usuario_id,
+        duracao,
+        tipo,
+        usuarios (
+          name
+        )
+      `)
+      .order('duracao', { ascending: false });
 
+    console.log("🔍 Dados recebidos do Supabase:");
+    console.log(JSON.stringify(data, null, 2));
 
-if (error || !data) {
-  console.error("Erro no Supabase:", error?.message || "Sem dados");
-  return res.status(500).json({ erro: "Erro ao buscar dados no Supabase" });
-  console.log("Dados recebidos:", data);
-
-}
-
+    if (error || !data) {
+      console.error("Erro no Supabase:", error?.message || "Sem dados");
+      return res.status(500).json({ erro: "Erro ao buscar dados no Supabase" });
+    }
 
     const rankingMap = {};
     for (const sessao of data) {
@@ -60,6 +58,7 @@ if (error || !data) {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
 });
